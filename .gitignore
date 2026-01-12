@@ -1,0 +1,8 @@
+.vs
+x64
+Debug
+*.vcxproj
+*.vcxproj.*
+
+vozila.dat
+Sort.dat
