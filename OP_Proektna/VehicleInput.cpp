@@ -1,13 +1,18 @@
+#define _CRT_SECURE_NO_WARNINGS
+#define MAX_VEHICLES 4000
+
 #include <iostream>
 #include <fstream>
 #include "Structures.h"
-
-#define MAX_VEHICLES 4000
 
 using namespace std;
 
 bool vnesiVozila(Vehicle vozila[], int n, string filename);
 void validate(Vehicle v);
+void prikaziCenaData(Vehicle v, int currentYear, int currentMonth, int currentDay);
+string presmetajDataZaSledenTehnicki(int dataNaProiz, int currentYear, int currentMonth, int currentDay);
+float presmetajCena(int kubikaza);
+float presmetajCenaOsiguruvanje(string tipNaOsig, int kubikaza);
 void sortirajVozila(Vehicle vozila[], int n);
 void promptString(string prompt, string& _str);
 void promptInteger(string prompt, int& _int);
@@ -66,6 +71,19 @@ int main()
 
     cout << "Gotovo!" << endl;
 
+    time_t now_c = time(nullptr);
+
+    tm* parts = localtime(&now_c);
+
+    int year = parts->tm_year + 1900;
+    int month = parts->tm_mon + 1;
+    int day = parts->tm_mday;
+
+    for (int i = 0; i < count; i++)
+    {
+        prikaziCenaData(vozila[i], year, month, day);
+    }
+
     return 0;
 }
 
@@ -97,6 +115,79 @@ bool vnesiVozila(Vehicle vozila[], int n, string filename)
     outputFile.close();
 
     return true;
+}
+
+void prikaziCenaData(Vehicle v, int currentYear, int currentMonth, int currentDay)
+{
+    string nextDate = presmetajDataZaSledenTehnicki(v.dataNaProiz, currentYear, currentMonth, currentDay);
+    float cost = presmetajCena(v.kubikaza);
+    float insCost = presmetajCenaOsiguruvanje(v.osig, v.kubikaza);
+    float finalCost = cost + insCost;
+
+    cout << "Prezime: " << v.prezime << endl;
+    cout << "Ime: " << v.ime << endl;
+    cout << "Registarski broj: " << v.regBroj << endl;
+    cout << "Cena: " << finalCost << endl;
+    cout << "Sleden tehnicki pregled na: " << nextDate << endl;
+    cout << endl;
+}
+
+string presmetajDataZaSledenTehnicki(int dataNaProiz, int currentYear, int currentMonth, int currentDay)
+{
+    int godProiz = (dataNaProiz / 10000) + 2000;
+    int mesProiz = (dataNaProiz - godProiz * 10000) / 100;
+    int denProiz = (dataNaProiz - mesProiz * 100) % 100;
+
+    int godRazlika = currentYear - godProiz;
+    int mesRazlika = currentMonth - mesProiz;
+    int denRazlika = currentDay - denProiz;
+
+    int denoviOdProiz = godRazlika * 365 + mesRazlika * 30 + denRazlika;
+    int godiniDoSledenTehnicki = 2;
+
+    if (denoviOdProiz >= 365 * 8)
+    {
+        godiniDoSledenTehnicki = 1;
+    }
+
+    return to_string(currentDay) + '.' + to_string(currentMonth) + '.' + to_string(currentYear + godiniDoSledenTehnicki);
+}
+
+float presmetajCena(int kubikaza)
+{
+    if (kubikaza >= 800 && kubikaza <= 1200) {
+        return 13000;
+    }
+    else if (kubikaza > 1200 && kubikaza <= 1600) {
+        return 15000;
+    }
+    else if (kubikaza > 1600 && kubikaza <= 2000) {
+        return 18000;
+    }
+    else if (kubikaza > 2000 && kubikaza <= 2500) {
+        return 20000;
+    }
+    else if (kubikaza > 2500) {
+        return 22000;
+    }
+
+    return 0;
+}
+
+float presmetajCenaOsiguruvanje(string tipNaOsig, int kubikaza)
+{
+    float cena = kubikaza * 61.5 / 3;
+
+    if (tipNaOsig == "fkasko")
+    {
+        return cena;
+    }
+    else if (tipNaOsig == "ffransiza")
+    {
+        return cena * 0.5;
+    }
+
+    return 0;
 }
 
 void sortirajVozila(Vehicle vozila[], int n)
