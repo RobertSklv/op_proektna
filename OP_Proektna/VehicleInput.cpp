@@ -4,13 +4,16 @@
 #include <iostream>
 #include <fstream>
 #include "Structures.h"
+#include <iomanip>
 
 using namespace std;
 
 bool vnesiVozila(Vehicle vozila[], int n, string filename);
+void vcitajVozila(string filename, Vehicle* vozila, int& count);
 void validate(Vehicle v);
+void prikaziCenaDataSiteVozila();
 void prikaziCenaData(Vehicle v, int currentYear, int currentMonth, int currentDay);
-string presmetajDataZaSledenTehnicki(int dataNaProiz, int currentYear, int currentMonth, int currentDay);
+void ispecatiDataZaSledenTehnicki(int dataNaProiz, int currentYear, int currentMonth, int currentDay);
 float presmetajCena(int kubikaza);
 float presmetajCenaOsiguruvanje(string tipNaOsig, int kubikaza);
 void sortirajVozila(Vehicle vozila[], int n);
@@ -71,18 +74,7 @@ int main()
 
     cout << "Gotovo!" << endl;
 
-    time_t now_c = time(nullptr);
-
-    tm* parts = localtime(&now_c);
-
-    int year = parts->tm_year + 1900;
-    int month = parts->tm_mon + 1;
-    int day = parts->tm_mday;
-
-    for (int i = 0; i < count; i++)
-    {
-        prikaziCenaData(vozila[i], year, month, day);
-    }
+    prikaziCenaDataSiteVozila();
 
     return 0;
 }
@@ -108,8 +100,12 @@ bool vnesiVozila(Vehicle vozila[], int n, string filename)
             << vozila[i].regBroj.substr(0, 9) << '|'
             << vozila[i].osig << '|'
             << vozila[i].kubikaza << '|'
-            << vozila[i].dataNaProiz
-            << endl;
+            << vozila[i].dataNaProiz;
+
+        if (i != n - 1)
+        {
+            outputFile << endl;
+        }
     }
 
     outputFile.close();
@@ -117,9 +113,69 @@ bool vnesiVozila(Vehicle vozila[], int n, string filename)
     return true;
 }
 
+void vcitajVozila(string filename, Vehicle* vozila, int& count)
+{
+    ifstream inputFile;
+
+    inputFile.open(filename);
+
+    if (!inputFile.is_open())
+    {
+        cerr << "Nastana greska pri otvoranje na datotekata." << endl;
+
+        return;
+    }
+
+    count = 0;
+
+    while (!inputFile.eof())
+    {
+        Vehicle v;
+
+        if (!getline(inputFile, v.ime, '|'))
+        {
+            break;
+        }
+        getline(inputFile, v.prezime, '|');
+        getline(inputFile, v.regBroj, '|');
+        getline(inputFile, v.osig, '|');
+        string kubikaza;
+        getline(inputFile, kubikaza, '|');
+        v.kubikaza = stoi(kubikaza);
+        string dataNaProiz;
+        getline(inputFile, dataNaProiz, '\n');
+        v.dataNaProiz = stoi(dataNaProiz);
+
+        vozila[count++] = v;
+    }
+
+    inputFile.close();
+}
+
+void prikaziCenaDataSiteVozila()
+{
+    time_t now_c = time(nullptr);
+    tm* parts = localtime(&now_c);
+
+    int year = parts->tm_year + 1900;
+    int month = parts->tm_mon + 1;
+    int day = parts->tm_mday;
+
+    Vehicle vozila[MAX_VEHICLES];
+    int count = 0;
+    vcitajVozila("Sort.dat", vozila, count);
+
+    for (int i = 0; i < count; i++)
+    {
+        prikaziCenaData(vozila[i], year, month, day);
+
+        cout << "Pritisni \"Enter\" za da prodlozis ponatamu..." << endl;
+        std::cin.get();
+    }
+}
+
 void prikaziCenaData(Vehicle v, int currentYear, int currentMonth, int currentDay)
 {
-    string nextDate = presmetajDataZaSledenTehnicki(v.dataNaProiz, currentYear, currentMonth, currentDay);
     float cost = presmetajCena(v.kubikaza);
     float insCost = presmetajCenaOsiguruvanje(v.osig, v.kubikaza);
     float finalCost = cost + insCost;
@@ -127,30 +183,35 @@ void prikaziCenaData(Vehicle v, int currentYear, int currentMonth, int currentDa
     cout << "Prezime: " << v.prezime << endl;
     cout << "Ime: " << v.ime << endl;
     cout << "Registarski broj: " << v.regBroj << endl;
-    cout << "Cena: " << finalCost << endl;
-    cout << "Sleden tehnicki pregled na: " << nextDate << endl;
-    cout << endl;
+    cout << "Cena: " << finalCost << " den." << endl;
+    cout << "Sleden tehnicki pregled na: ";
+    ispecatiDataZaSledenTehnicki(v.dataNaProiz, currentYear, currentMonth, currentDay);
+    cout << endl << endl;
 }
 
-string presmetajDataZaSledenTehnicki(int dataNaProiz, int currentYear, int currentMonth, int currentDay)
+void ispecatiDataZaSledenTehnicki(int dataNaProiz, int currentYear, int currentMonth, int currentDay)
 {
-    int godProiz = (dataNaProiz / 10000) + 2000;
+    int godProiz = dataNaProiz / 10000;
     int mesProiz = (dataNaProiz - godProiz * 10000) / 100;
     int denProiz = (dataNaProiz - mesProiz * 100) % 100;
+    godProiz += 2000;
 
-    int godRazlika = currentYear - godProiz;
-    int mesRazlika = currentMonth - mesProiz;
-    int denRazlika = currentDay - denProiz;
+    int denoviProiz = godProiz * 365 + mesProiz * 30 + denProiz;
+    int vkupnoDenovi = currentYear * 365 + currentMonth * 30 + currentDay;
 
-    int denoviOdProiz = godRazlika * 365 + mesRazlika * 30 + denRazlika;
+    int godRazlika = (vkupnoDenovi - denoviProiz) / 365;
+
     int godiniDoSledenTehnicki = 2;
 
-    if (denoviOdProiz >= 365 * 8)
+    if (godRazlika >= 8)
     {
         godiniDoSledenTehnicki = 1;
     }
 
-    return to_string(currentDay) + '.' + to_string(currentMonth) + '.' + to_string(currentYear + godiniDoSledenTehnicki);
+    cout <<
+        setw(2) << setfill('0') << to_string(currentDay) << '.' <<
+        setw(2) << setfill('0') << to_string(currentMonth) << '.' <<
+        setw(4) << setfill('0') << to_string(currentYear + godiniDoSledenTehnicki);
 }
 
 float presmetajCena(int kubikaza)
