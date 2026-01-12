@@ -85,13 +85,13 @@ bool vnesiVozila(Vehicle vozila[], int n, string filename)
     for (int i = 0; i < n; i++)
     {
         outputFile
-            << vozila[i].ime.substr(0, 15) << '|'
-            << vozila[i].prezime.substr(0, 15) << '|'
-            << vozila[i].regBroj.substr(0, 9) << '|'
-            << vozila[i].osig << '|'
-            << vozila[i].kubikaza << '|'
-            << vozila[i].dataNaProiz
-            << endl;
+            << "Ime na sopstvenik: " << vozila[i].ime.substr(0, 15) << endl
+            << "Prezime na sopstvenik: " << vozila[i].prezime.substr(0, 15) << endl
+            << "Registarski broj: " << vozila[i].regBroj.substr(0, 9) << endl
+            << "Nacin na osiguruvanje: " << vozila[i].osig << endl
+            << "Kubikaza: " << vozila[i].kubikaza << endl
+            << "Data na proizvodstvo: " << vozila[i].dataNaProiz
+            << "-----------------------------------------------------------------------" << endl;
     }
 
     outputFile.close();
