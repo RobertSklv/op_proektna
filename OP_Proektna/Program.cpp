@@ -3,10 +3,20 @@
 
 #include <iostream>
 #include <fstream>
-#include "Structures.h"
+#include <string>
 #include <iomanip>
 
 using namespace std;
+
+struct Vehicle
+{
+    string ime;
+    string prezime;
+    string regBroj;
+    string osig;
+    int kubikaza;
+    int dataNaProiz;
+};
 
 bool vnesiVozila(Vehicle vozila[], int n, string filename);
 void vcitajVozila(string filename, Vehicle* vozila, int& count);
