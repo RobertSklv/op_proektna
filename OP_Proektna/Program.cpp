@@ -19,8 +19,6 @@ struct Vehicle
 };
 
 bool vnesiVozila(Vehicle vozila[], int n, string filename);
-void vcitajVozila(string filename, Vehicle* vozila, int& count);
-void validate(Vehicle v);
 void prikaziCenaDataSiteVozila();
 void prikaziCenaData(Vehicle v, int currentYear, int currentMonth, int currentDay);
 void ispecatiDataZaSledenTehnicki(int dataNaProiz, int currentYear, int currentMonth, int currentDay);
@@ -43,26 +41,29 @@ void promptInteger(string prompt, int& _int);
 
 int main()
 {
-    Vehicle vozila[MAX_VEHICLES];
+    Vehicle vehicles[MAX_VEHICLES];
+
+    cout << "=== SISTEM ZA TEHNICKI PREGLEDI ===" << endl;
+    cout << "Maksimalen kapacitet: " << MAX_VEHICLES << " vozila" << endl << endl;
 
     int count = 0;
     while (count < MAX_VEHICLES)
     {
-        cout << "=== Kreiranje zapis za vozilo ===" << endl;
+        cout << "=== KREIRANJE ZAPIS ZA VOZILO ===" << endl << endl;
 
-        promptName(vozila[count].ime);
-        promptSurname(vozila[count].prezime);
-        promptRegistrationNumber(vozila[count].regBroj);
-        promptInsuranceType(vozila[count].osig);
-        promptCubicCapacity(vozila[count].kubikaza);
-        promptDateOfManufacture(vozila[count].dataNaProiz);
+        promptName(vehicles[count].ime);
+        promptSurname(vehicles[count].prezime);
+        promptRegistrationNumber(vehicles[count].regBroj);
+        promptInsuranceType(vehicles[count].osig);
+        promptCubicCapacity(vehicles[count].kubikaza);
+        promptDateOfManufacture(vehicles[count].dataNaProiz);
 
         count++;
 
         char proceed;
 
         do {
-            cout << "Vnesi 'y' za da prodolzis da vnesuvas vozila, vnesi 'n' za prekin: " << endl;
+            cout << "Vnesi 'y' za da prodolzis da vnesuvas vozila, vnesi 'n' za prekin: " << endl << endl;
             cin >> proceed;
         } while (proceed != 'y' && proceed != 'n');
 
@@ -75,25 +76,25 @@ int main()
         cin.ignore(9999, '\n');
     }
 
-    if (!vnesiVozila(vozila, count, "vozila.dat"))
+    if (!vnesiVozila(vehicles, count, "vozila.dat"))
     {
         return 1;
     }
     else
     {
-        cout << "Vozilata se zacuvani vo sistemot!" << endl;
+        cout << "Vozilata se zacuvani vo sistemot!" << endl << endl;
     }
 
-    cout << "Sortiranje na podatocite..." << endl;
+    cout << "Sortiranje na podatocite..." << endl << endl;
 
-    sortirajVozila(vozila, count);
+    sortirajVozila(vehicles, count);
 
-    if (!vnesiVozila(vozila, count, "Sort.dat"))
+    if (!vnesiVozila(vehicles, count, "Sort.dat"))
     {
         return 1;
     }
 
-    cout << "Gotovo!" << endl;
+    cout << "Gotovo!" << endl << endl;
 
     prikaziCenaDataSiteVozila();
 
@@ -108,7 +109,7 @@ bool vnesiVozila(Vehicle vozila[], int n, string filename)
 
     if (!outputFile.is_open())
     {
-        cerr << "Nastana greska pri otvoranje na datotekata." << endl;
+        cout << "Greska: Nastana greska pri otvoranje na datotekata!" << endl;
 
         return false;
     }
@@ -134,20 +135,25 @@ bool vnesiVozila(Vehicle vozila[], int n, string filename)
     return true;
 }
 
-void vcitajVozila(string filename, Vehicle* vozila, int& count)
+void prikaziCenaDataSiteVozila()
 {
+    time_t now_c = time(nullptr);
+    tm* parts = localtime(&now_c);
+
+    int year = parts->tm_year + 1900;
+    int month = parts->tm_mon + 1;
+    int day = parts->tm_mday;
+
     ifstream inputFile;
 
-    inputFile.open(filename);
+    inputFile.open("Sort.dat");
 
     if (!inputFile.is_open())
     {
-        cerr << "Nastana greska pri otvoranje na datotekata." << endl;
+        cout << "Greska: Nastana greska pri otvoranje na datotekata." << endl;
 
         return;
     }
-
-    count = 0;
 
     while (!inputFile.eof())
     {
@@ -157,6 +163,7 @@ void vcitajVozila(string filename, Vehicle* vozila, int& count)
         {
             break;
         }
+
         getline(inputFile, v.prezime, '|');
         getline(inputFile, v.regBroj, '|');
         getline(inputFile, v.osig, '|');
@@ -167,32 +174,10 @@ void vcitajVozila(string filename, Vehicle* vozila, int& count)
         getline(inputFile, dataNaProiz, '\n');
         v.dataNaProiz = stoi(dataNaProiz);
 
-        vozila[count++] = v;
+        prikaziCenaData(v, year, month, day);
     }
 
     inputFile.close();
-}
-
-void prikaziCenaDataSiteVozila()
-{
-    time_t now_c = time(nullptr);
-    tm* parts = localtime(&now_c);
-
-    int year = parts->tm_year + 1900;
-    int month = parts->tm_mon + 1;
-    int day = parts->tm_mday;
-
-    Vehicle vozila[MAX_VEHICLES];
-    int count = 0;
-    vcitajVozila("Sort.dat", vozila, count);
-
-    for (int i = 0; i < count; i++)
-    {
-        prikaziCenaData(vozila[i], year, month, day);
-
-        cout << "Pritisni \"Enter\" za da prodlozis ponatamu..." << endl;
-        std::cin.get();
-    }
 }
 
 void prikaziCenaData(Vehicle v, int currentYear, int currentMonth, int currentDay)
@@ -343,7 +328,7 @@ void promptName(string& name)
 
     if (!validateNameSurname(name))
     {
-        cout << "Greshka: Imeto ne smee da bide podolgo od 15 karakteri i ne smee da bide prazno!" << endl;
+        cout << "Greska: Imeto ne smee da bide podolgo od 15 karakteri i ne smee da bide prazno!" << endl;
         promptName(name);
     }
 }
@@ -354,7 +339,7 @@ void promptSurname(string& surname)
 
     if (!validateNameSurname(surname))
     {
-        cout << "Greshka: Prezimeto ne smee da bide podolgo od 15 karakteri i ne smee da bide prazno!" << endl;
+        cout << "Greska: Prezimeto ne smee da bide podolgo od 15 karakteri i ne smee da bide prazno!" << endl;
         promptSurname(surname);
     }
 }
@@ -365,7 +350,7 @@ void promptRegistrationNumber(string& regBroj)
 
     if (!validateRegistrationNumber(regBroj))
     {
-        cout << "Greshka: Nevaliden format na registracija! Koristete format: SK-001-AA" << endl;
+        cout << "Greska: Nevaliden format na registracija! Koristete format: SK-001-AA" << endl;
         promptRegistrationNumber(regBroj);
     }
 }
@@ -376,7 +361,7 @@ void promptInsuranceType(string& ins)
 
     if (!validateInsuranceType(ins))
     {
-        cout << "Greshka: Vnesete 'fkasko' ili 'ffransiza'!" << endl;
+        cout << "Greska: Vnesete 'fkasko' ili 'ffransiza'!" << endl;
         promptInsuranceType(ins);
     }
 }
@@ -387,7 +372,7 @@ void promptCubicCapacity(int& cc)
 
     if (!validateCubicCapacity(cc))
     {
-        cout << "Greshka: Kubikazata mora da bide pomegju 800 i 4000!" << endl;
+        cout << "Greska: Kubikazata mora da bide pomegju 800 i 4000!" << endl;
         promptCubicCapacity(cc);
     }
 }
@@ -398,7 +383,7 @@ void promptDateOfManufacture(int& cc)
 
     if (!validateDateOfManufacture(cc))
     {
-        cout << "Greshka: Nevalidna data! Koristete format GGMMDD" << endl;
+        cout << "Greska: Nevalidna data! Koristete format GGMMDD" << endl;
         promptDateOfManufacture(cc);
     }
 }
@@ -417,7 +402,7 @@ void promptString(string prompt, string& _str)
 
         cin.clear();
         cin.ignore(9999, '\n');
-        cerr << "Nevaliden vlez!" << endl;
+        cout << "Greska: Nevaliden vlez!" << endl;
     }
 }
 
@@ -435,6 +420,6 @@ void promptInteger(string prompt, int& _int)
 
         cin.clear();
         cin.ignore(9999, '\n');
-        cerr << "Nevaliden vlez!" << endl;
+        cout << "Greska: Nevaliden vlez!" << endl;
     }
 }
