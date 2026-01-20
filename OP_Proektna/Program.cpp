@@ -27,6 +27,17 @@ void ispecatiDataZaSledenTehnicki(int dataNaProiz, int currentYear, int currentM
 float presmetajCena(int kubikaza);
 float presmetajCenaOsiguruvanje(string tipNaOsig, int kubikaza);
 void sortirajVozila(Vehicle vozila[], int n);
+bool validateNameSurname(string str);
+bool validateRegistrationNumber(string reg);
+bool validateInsuranceType(string ins);
+bool validateCubicCapacity(int cc);
+bool validateDateOfManufacture(int date);
+void promptName(string& name);
+void promptSurname(string& surname);
+void promptRegistrationNumber(string& regBroj);
+void promptInsuranceType(string& ins);
+void promptCubicCapacity(int& cc);
+void promptDateOfManufacture(int& cc);
 void promptString(string prompt, string& _str);
 void promptInteger(string prompt, int& _int);
 
@@ -37,14 +48,14 @@ int main()
     int count = 0;
     while (count < MAX_VEHICLES)
     {
-        cout << "Kreiranje zapis za vozilo..." << endl;
+        cout << "=== Kreiranje zapis za vozilo ===" << endl;
 
-        promptString("Vnesi ime", vozila[count].ime);
-        promptString("Vnesi prezime", vozila[count].prezime);
-        promptString("Vnesi registarski broj (SK-001-AA)", vozila[count].regBroj);
-        promptString("Vnesi tip na osiguruvanje (fkasko / ffransiza)", vozila[count].osig);
-        promptInteger("Vnesi kubikaza na motorot (800 - 4000)", vozila[count].kubikaza);
-        promptInteger("Vnesi data na prizvodstvo (GGMMDD)", vozila[count].dataNaProiz);
+        promptName(vozila[count].ime);
+        promptSurname(vozila[count].prezime);
+        promptRegistrationNumber(vozila[count].regBroj);
+        promptInsuranceType(vozila[count].osig);
+        promptCubicCapacity(vozila[count].kubikaza);
+        promptDateOfManufacture(vozila[count].dataNaProiz);
 
         count++;
 
@@ -278,6 +289,117 @@ void sortirajVozila(Vehicle vozila[], int n)
                 vozila[j] = temp;
             }
         }
+    }
+}
+
+bool validateNameSurname(string str)
+{
+    return !str.empty() && str.length() <= 15;
+}
+
+bool validateRegistrationNumber(string reg)
+{
+    if (reg.length() != 9)
+        return false;
+    if (reg[2] != '-' || reg[6] != '-')
+        return false;
+
+    for (int i = 0; i < 9; i++) {
+        if (i == 2 || i == 6)
+            continue;
+        if (!isalnum(reg[i]))
+            return false;
+    }
+
+    return true;
+}
+
+bool validateInsuranceType(string ins)
+{
+    return ins == "fkasko" || ins == "ffransiza";
+}
+
+bool validateCubicCapacity(int cc)
+{
+    return cc >= 800 && cc <= 4000;
+}
+
+bool validateDateOfManufacture(int date)
+{
+    if (date < 0 || date > 999999) return false;
+
+    int mesec = (date / 100) % 100;
+    int den = date % 100;
+
+    if (mesec < 1 || mesec > 12) return false;
+    if (den < 1 || den > 31) return false;
+
+    return true;
+}
+
+void promptName(string& name)
+{
+    promptString("Vnesi ime", name);
+
+    if (!validateNameSurname(name))
+    {
+        cout << "Greshka: Imeto ne smee da bide podolgo od 15 karakteri i ne smee da bide prazno!" << endl;
+        promptName(name);
+    }
+}
+
+void promptSurname(string& surname)
+{
+    promptString("Vnesi prezime", surname);
+
+    if (!validateNameSurname(surname))
+    {
+        cout << "Greshka: Prezimeto ne smee da bide podolgo od 15 karakteri i ne smee da bide prazno!" << endl;
+        promptSurname(surname);
+    }
+}
+
+void promptRegistrationNumber(string& regBroj)
+{
+    promptString("Vnesi registarski broj (SK-001-AA)", regBroj);
+
+    if (!validateRegistrationNumber(regBroj))
+    {
+        cout << "Greshka: Nevaliden format na registracija! Koristete format: SK-001-AA" << endl;
+        promptRegistrationNumber(regBroj);
+    }
+}
+
+void promptInsuranceType(string& ins)
+{
+    promptString("Vnesi tip na osiguruvanje (fkasko / ffransiza)", ins);
+
+    if (!validateInsuranceType(ins))
+    {
+        cout << "Greshka: Vnesete 'fkasko' ili 'ffransiza'!" << endl;
+        promptInsuranceType(ins);
+    }
+}
+
+void promptCubicCapacity(int& cc)
+{
+    promptInteger("Vnesi kubikaza na motorot (800 - 4000)", cc);
+
+    if (!validateCubicCapacity(cc))
+    {
+        cout << "Greshka: Kubikazata mora da bide pomegju 800 i 4000!" << endl;
+        promptCubicCapacity(cc);
+    }
+}
+
+void promptDateOfManufacture(int& cc)
+{
+    promptInteger("Vnesi data na prizvodstvo (GGMMDD)", cc);
+
+    if (!validateDateOfManufacture(cc))
+    {
+        cout << "Greshka: Nevalidna data! Koristete format GGMMDD" << endl;
+        promptDateOfManufacture(cc);
     }
 }
 
