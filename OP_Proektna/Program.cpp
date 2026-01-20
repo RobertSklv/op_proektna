@@ -8,6 +8,7 @@
 
 using namespace std;
 
+// Deklariranje na strukturata za vozila
 struct Vehicle
 {
     string ime;
@@ -18,6 +19,7 @@ struct Vehicle
     int dataNaProiz;
 };
 
+// Deklariranje na site funkcii koi kje se upotrebuvaat vo programata
 bool vnesiVozila(Vehicle vozila[], int n, string filename);
 void prikaziCenaDataSiteVozila();
 void prikaziCenaData(Vehicle v, int currentYear, int currentMonth, int currentDay);
@@ -41,16 +43,19 @@ void promptInteger(string prompt, int& _int);
 
 int main()
 {
+    // Deklariranje na niza od vozila so maksimalna dolzina: 4000
     Vehicle vehicles[MAX_VEHICLES];
 
     cout << "=== SISTEM ZA TEHNICKI PREGLEDI ===" << endl;
     cout << "Maksimalen kapacitet: " << MAX_VEHICLES << " vozila" << endl << endl;
 
+    // Ciklus koj se izvrsuva se dodeka ne se nadmine maksimalniot broj na vozila
     int count = 0;
     while (count < MAX_VEHICLES)
     {
         cout << "=== KREIRANJE ZAPIS ZA VOZILO ===" << endl << endl;
 
+        // Baranje informacii od korisnikot za zapis na vozilo vo sistemot
         promptName(vehicles[count].ime);
         promptSurname(vehicles[count].prezime);
         promptRegistrationNumber(vehicles[count].regBroj);
@@ -58,31 +63,40 @@ int main()
         promptCubicCapacity(vehicles[count].kubikaza);
         promptDateOfManufacture(vehicles[count].dataNaProiz);
 
+        // Otkako informaciite se vneseni bez nikakvi detektirani greski, go inkrementirame brojacot
         count++;
 
+        // Deklarirame promenliva koja kje oznacuva dali ciklusot da se izvrsi uste ednas
         char proceed;
 
+        // Se dodeka vlezot ne e 'y' ili 'n', barame od korisnikot da vnese 'y' ili 'n'
         do {
             cout << "Vnesi 'y' za da prodolzis da vnesuvas vozila, vnesi 'n' za prekin: " << endl << endl;
             cin >> proceed;
         } while (proceed != 'y' && proceed != 'n');
 
+        // Dokolku vlezot e 'n', go prekinuvame ciklusot
         if (proceed == 'n')
         {
             break;
         }
 
+        // Gi resetirame site mozni nastanati greski vo vlezot
         cin.clear();
+
+        // Go pomestuvame markerot na slednata nova linija
         cin.ignore(9999, '\n');
     }
 
+    // Gi vnesuvame vozilata
     if (!vnesiVozila(vehicles, count, "vozila.dat"))
     {
-        return 1;
+        cout << "Vozilata se zacuvani vo sistemot!" << endl << endl;
     }
     else
     {
-        cout << "Vozilata se zacuvani vo sistemot!" << endl << endl;
+        // Dokolku vnesiVozila vrati false, toa znaci deka nastanala nekoja greska i mora da zapreme so programata
+        return 1;
     }
 
     cout << "Sortiranje na podatocite..." << endl << endl;
@@ -91,6 +105,7 @@ int main()
 
     if (!vnesiVozila(vehicles, count, "Sort.dat"))
     {
+        // Dokolku vnesiVozila vrati false, toa znaci deka nastanala nekoja greska i mora da zapreme so programata
         return 1;
     }
 
@@ -101,6 +116,9 @@ int main()
     return 0;
 }
 
+// Funkcija za vnesuvanje na podatocite za vozilata vo datoteka
+// Podatocite se oddeleni so '|' karakter
+// Sekoe vozilo se naogja vo posebna linija
 bool vnesiVozila(Vehicle vozila[], int n, string filename)
 {
     ofstream outputFile;
@@ -137,6 +155,7 @@ bool vnesiVozila(Vehicle vozila[], int n, string filename)
 
 void prikaziCenaDataSiteVozila()
 {
+    // Vlecenje na momentalnata data od sistemot
     time_t now_c = time(nullptr);
     tm* parts = localtime(&now_c);
 
@@ -146,6 +165,7 @@ void prikaziCenaDataSiteVozila()
 
     ifstream inputFile;
 
+    // Otvoranje na Sort.dat datotekata
     inputFile.open("Sort.dat");
 
     if (!inputFile.is_open())
@@ -155,15 +175,19 @@ void prikaziCenaDataSiteVozila()
         return;
     }
 
+    // Ciklusot se izvrsuva se dodeka ne se dostigne krajot na datotekata
     while (!inputFile.eof())
     {
         Vehicle v;
 
+        // Dokolku ovde dobieme false kako povratna vrednost, toa znaci
+        // deka ne postoi sledna linija i ciklusot mora da se prekine
         if (!getline(inputFile, v.ime, '|'))
         {
             break;
         }
 
+        // Citanje na ostanatite podatoci za voziloto od datotekata
         getline(inputFile, v.prezime, '|');
         getline(inputFile, v.regBroj, '|');
         getline(inputFile, v.osig, '|');
@@ -174,9 +198,11 @@ void prikaziCenaDataSiteVozila()
         getline(inputFile, dataNaProiz, '\n');
         v.dataNaProiz = stoi(dataNaProiz);
 
+        // Prikazuvanje na cenata i datata za sledniot tehnicki pregled
         prikaziCenaData(v, year, month, day);
     }
 
+    // Zatvoranje na datotekata
     inputFile.close();
 }
 
@@ -197,14 +223,19 @@ void prikaziCenaData(Vehicle v, int currentYear, int currentMonth, int currentDa
 
 void ispecatiDataZaSledenTehnicki(int dataNaProiz, int currentYear, int currentMonth, int currentDay)
 {
+    // Presmetuvanje na datata na proizvodsvto od edna integer vrednost
     int godProiz = dataNaProiz / 10000;
     int mesProiz = (dataNaProiz - godProiz * 10000) / 100;
     int denProiz = (dataNaProiz - mesProiz * 100) % 100;
     godProiz += 2000;
 
+    // Datata na proizvodstvo pretvorena vo denovi
     int denoviProiz = godProiz * 365 + mesProiz * 30 + denProiz;
+
+    // Denesnata data pretvorena vo denovi
     int vkupnoDenovi = currentYear * 365 + currentMonth * 30 + currentDay;
 
+    // Presmetuvanje na razlikata vo godini
     int godRazlika = (vkupnoDenovi - denoviProiz) / 365;
 
     int godiniDoSledenTehnicki = 2;
@@ -263,9 +294,9 @@ void sortirajVozila(Vehicle vozila[], int n)
     {
         for (int j = i + 1; j < n; j++)
         {
-            if (vozila[i].ime > vozila[j].ime
+            if (vozila[i].prezime > vozila[j].prezime
                 ||
-                vozila[i].prezime > vozila[j].prezime
+                vozila[i].ime > vozila[j].ime
                 ||
                 vozila[i].kubikaza > vozila[j].kubikaza)
             {
@@ -390,6 +421,7 @@ void promptDateOfManufacture(int& cc)
 
 void promptString(string prompt, string& _str)
 {
+    // Ciklusot se izvrsuva se dodeka ne se vnese validen vlez
     while (true)
     {
         cout << prompt << ": ";
@@ -408,6 +440,7 @@ void promptString(string prompt, string& _str)
 
 void promptInteger(string prompt, int& _int)
 {
+    // Ciklusot se izvrsuva se dodeka ne se vnese validen vlez
     while (true)
     {
         cout << prompt << ": ";
